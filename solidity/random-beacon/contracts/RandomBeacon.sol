@@ -16,6 +16,15 @@ pragma solidity ^0.8.6;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+/// @title Sortition Pool contract interface
+/// @notice This is an interface with just a few function signatures of the
+///         Sortition Pool contract, which is available at
+///         https://github.com/keep-network/sortition-pools/blob/main/contracts/SortitionPool.sol
+interface ISortitionPool {
+    function joinPool(address operator) external;
+    function isOperatorInPool(address operator) external view returns (bool);
+}
+
 /// @title Random beacon
 /// @notice Random beacon contract which represents the on-chain part of the
 ///         random beacon functionality
@@ -58,6 +67,12 @@ contract RandomBeacon is Ownable {
 
     /// @notice Slashing amount for submitting malicious DKG result
     uint256 public maliciousDkgResultSlashingAmount;
+
+    ISortitionPool public sortitionPool;
+
+    constructor(ISortitionPool _sortitionPool) {
+        sortitionPool = _sortitionPool;
+    }
 
     /// @notice Updates the values of relay entry parameters
     /// @dev Can be called only by the contract owner, which should be the
@@ -126,5 +141,13 @@ contract RandomBeacon is Ownable {
     ) external onlyOwner {
         relayEntrySubmissionFailureSlashingAmount = _relayEntrySubmissionFailureSlashingAmount;
         maliciousDkgResultSlashingAmount = _maliciousDkgResultSlashingAmount;
+    }
+
+    /// @notice Registers caller in the sortition pool.
+    function registerMemberCandidate() external {
+        address operator = msg.sender;
+        if (!sortitionPool.isOperatorInPool(operator)) {
+            sortitionPool.joinPool(operator);
+        }
     }
 }
