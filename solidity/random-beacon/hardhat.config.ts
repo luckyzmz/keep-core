@@ -5,6 +5,7 @@ import "hardhat-deploy"
 import "@tenderly/hardhat-tenderly"
 import "@nomiclabs/hardhat-waffle"
 import "hardhat-gas-reporter"
+import "@typechain/hardhat"
 
 const config: HardhatUserConfig = {
   solidity: {
